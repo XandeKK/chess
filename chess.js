@@ -12,7 +12,6 @@ const BOARD = [
 class Player {
 	constructor(color) {
 		this.color = color;
-		this.turn = color === 'white';
 	}
 }
 
@@ -23,10 +22,6 @@ class Piece {
 		this.board = board;
 		this.number_movements = 0;
 		this.last_movement = this.board.movement;
-	}
-
-	toString() {
-		return this.constructor.name[0];
 	}
 
 	move(x, y) {
@@ -215,8 +210,6 @@ class Rook extends Piece {
 			}
 			movements[`${x}${i}`] = this.move.bind(this, x, i);
 		}
-
-		// castling
 
 		return movements;
 	}
@@ -465,8 +458,27 @@ class King extends Piece {
 		}
 
 		// castling
+		const edge = this.player.color === 'white' ? 7 : 0;
+		const piece0 = this.board.getPiece([0, edge]);
+		const piece1 = this.board.getPiece([7, edge]);
+
+		if (piece0.constructor.name == 'Rook' && piece0.number_movements == 0 && this.number_movements == 0) {
+			movements[`${x - 2}${y}`] = this.castling.bind(this, x - 2, piece0, x - 1);
+		}
+
+		if (piece1.constructor.name == 'Rook' && piece1.number_movements == 0 && this.number_movements == 0) {
+			movements[`${x + 2}${y}`] = this.castling.bind(this, x + 2, piece1, x + 1);
+		}
 
 		return movements;
+	}
+
+	castling(x, rook, x_rook) {
+		const y = this.position[1];
+		this.move(x,y);
+		rook.move(x_rook,y);
+
+		return true;
 	}
 }
 
@@ -525,10 +537,6 @@ class Board {
 		return this.board[y][x];
 	}
 
-	getBoard() {
-		return this.board;
-	}
-
 	havePieceInThatPosition(position) {
 		return this.getPiece(position) !== 0;
 	}
@@ -542,27 +550,6 @@ class Board {
 		if (target?.player?.color === opponent) return true;
 		return false;
 	}
-
-	clear() {
-		delete this.board;
-		this.board = BOARD.map((arr)=> {
-			return arr.slice();
-		});
-	}
-
-	toString() {
-		let string = '   0 1 2 3 4 5 6 7\n\n';
-		let i = 0;
-		this.board.forEach((arr)=> {
-			string += `${i}  `;
-			arr.forEach((elem)=> {
-				string += `${elem} `;
-			})
-			string += '\n';
-			i++;
-		})
-		return string;
-	}
 }
 
 class Game {
@@ -573,37 +560,4 @@ class Game {
 		this.player2 = new Player('black');
 		this.board = new Board(this.player1, this.player2);
 	}
-
-	getPiece(position) {
-		const piece = this.board.getPiece(position);
-		return piece;
-	}
-
-	reset() {
-		this.board.clear();
-		this.player1 = null;
-		this.player2 = null;
-	}
-
-	printBoard() {
-		console.log(this.board.toString());
-	}
 }
-
-game = new Game();
-
-game.start();
-
-game.printBoard();
-
-game.getPiece([0,1]).possibleMovements()['03']();
-game.getPiece([0,3]).possibleMovements()['04']();
-game.getPiece([0,4]).possibleMovements()['05']();
-game.getPiece([0,5]).possibleMovements()['16']();
-console.log(a = game.getPiece([1,6]).possibleMovements()['27']());
-
-game.printBoard();
-
-// game.getPiece([0,4]).possibleMovements()['15']();
-
-// game.printBoard();
