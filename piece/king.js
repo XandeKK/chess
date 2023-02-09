@@ -41,4 +41,18 @@ class King extends Piece {
 
 		return true;
 	}
+
+	check() {
+		const x = this.position[0];
+		const y = this.position[1];
+		const opponent_color = this.player.color === 'white' ? 'black' : 'white';
+		const pieces = this.board.pieces[opponent_color];
+
+		pieces.forEach((piece)=> {
+			if (piece.possibleMovements()[`${x}${y}`]) {
+				return true
+			}
+		});
+		return false;
+	}
 }
