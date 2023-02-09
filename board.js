@@ -12,6 +12,10 @@ const BOARD = [
 class Board {
 	constructor(player1, player2) {
 		this.movement = 0;
+		this.pieces = {
+			white: [],
+			black: []
+		}
 		this.board = BOARD.map((arr)=> {
 			return arr.slice();
 		});
@@ -34,21 +38,40 @@ class Board {
 	}
 
 	addAllPieces(pawn_line, king_line, player) {
+		const color = player.color;
 		for (let i = 0; i < 8; i++) {
-			this.board[pawn_line][i] = new Pawn(player, [i, pawn_line], this);
+			const pawn = new Pawn(player, [i, pawn_line], this);
+			this.board[pawn_line][i] = pawn;
+			this.pieces[color].push(pawn);
 		}
 
-		this.board[king_line][0] = new Rook(player, [0, king_line], this);
-		this.board[king_line][7] = new Rook(player, [7, king_line], this);
+		const rook0 = new Rook(player, [0, king_line], this);
+		const rook1 = new Rook(player, [7, king_line], this);
+		this.board[king_line][0] = rook0;
+		this.board[king_line][7] = rook1;
+		this.pieces[color].push(rook0);
+		this.pieces[color].push(rook1);
 
-		this.board[king_line][1] = new Knight(player, [1, king_line], this);
-		this.board[king_line][6] = new Knight(player, [6, king_line], this);
+		const knight0 = new Knight(player, [1, king_line], this);
+		const knight1 = new Knight(player, [6, king_line], this);
+		this.board[king_line][1] = knight0;
+		this.board[king_line][6] = knight1;
+		this.pieces[color].push(knight0);
+		this.pieces[color].push(knight1);
 
-		this.board[king_line][2] = new Bishop(player, [2, king_line], this);
-		this.board[king_line][5] = new Bishop(player, [5, king_line], this);
+		const bishop0 = new Bishop(player, [2, king_line], this);
+		const bishop1 = new Bishop(player, [5, king_line], this);
+		this.board[king_line][2] = bishop0;
+		this.board[king_line][5] = bishop1;
+		this.pieces[color].push(bishop0);
+		this.pieces[color].push(bishop1);
 
-		this.board[king_line][3] = new Queen(player, [3, king_line], this);
-		this.board[king_line][4] = new King(player, [4, king_line], this);
+		const queen = new Queen(player, [3, king_line], this);
+		const king = new King(player, [4, king_line], this);
+		this.board[king_line][3] = queen;
+		this.board[king_line][4] = king;
+		this.pieces[color].push(queen);
+		this.pieces[color].push(king);
 	}
 
 	setPiece(position, piece) {
@@ -62,6 +85,16 @@ class Board {
 		const y = position[1];
 		if (x < 0 || x > 7 || y < 0 || y > 7) return false;
 		return this.board[y][x];
+	}
+
+	deletePiece(piece) {
+		const pieces = this.pieces[piece.player.color];
+		for(let i = 0; i < pieces.length; i++){         
+      if (pieces[i] === piece) { 
+        pieces.splice(i, 1); 
+        return true;
+      }
+    }
 	}
 
 	havePieceInThatPosition(position) {
